@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Preços - Tabela FIPE</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        .result-item {
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Consulta de Preços - Tabela FIPE</h1>
+
+    <h2>Variação de Preço</h2>
+    <form id="price-variation-form">
+        <label for="vehicle-type">Tipo de Veículo:</label>
+        <select id="vehicle-type" required>
+            <option value="cars">Carros</option>
+            <option value="motorcycles">Motos</option>
+            <option value="trucks">Caminhões</option>
+        </select>
+
+        <label for="fipe-code">Código FIPE:</label>
+        <input type="text" id="fipe-code" placeholder="Ex: 7391" required>
+
+        <label for="year1">Ano 1:</label>
+        <input type="text" id="year1" placeholder="Ex: 2022-3" required>
+
+        <label for="year2">Ano 2:</label>
+        <input type="text" id="year2" placeholder="Ex: 2023-3" required>
+
+        <button type="submit">Consultar Variação</button>
+    </form>
+
+    <div id="results"></div>
+
+    <h2>Histórico de Preço</h2>
+    <form id="price-history-form">
+        <label for="vehicle-type-history">Tipo de Veículo:</label>
+        <select id="vehicle-type-history" required>
+            <option value="cars">Carros</option>
+            <option value="motorcycles">Motos</option>
+            <option value="trucks">Caminhões</option>
+        </select>
+
+        <label for="fipe-code-history">Código FIPE:</label>
+        <input type="text" id="fipe-code-history" placeholder="Ex: 7391" required>
+
+        <button type="submit">Consultar Histórico</button>
+    </form>
+
+    <div id="history-results"></div>
+
+    <script>
+        // Função para consultar variação de preço
+        document.getElementById("price-variation-form").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const vehicleType = document.getElementById("vehicle-type").value;
+            const fipeCode = document.getElementById("fipe-code").value;
+            const year1 = document.getElementById("year1").value;
+            const year2 = document.getElementById("year2").value;
+
+            const response = await fetch(http://127.0.0.1:8000/variacao_preco/${vehicleType}/${fipeCode}/${year1}/${year2});
+            const result = await response.json();
+            displayPriceVariation(result);
+        });
+
+        // Função para consultar histórico de preço
+        document.getElementById("price-history-form").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const vehicleType = document.getElementById("vehicle-type-history").value;
+            const fipeCode = document.getElementById("fipe-code-history").value;
+
+            const response = await fetch(`http://127.0.0.1:8000/price-history/${vehicleType}/${fipeCode}`, {
+                headers: { 'X-Subscription-Token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlOThiZmQ1NC1iNTIwLTRhMDQtYThjMC01YzMwNjY2YWQ1MWEiLCJlbWFpbCI6Im1hdGlhc2Z1a3NzQGdtYWlsLmNvbSIsImlhdCI6MTcyNzAzMjA3N30.fNC-KCn9kqz5iLXrPsgK1G0i3iaopHiRz2DhOjr83CU' }
+            });
+            const result = await response.json();
+            displayPriceHistory(result.price_history);
+        });
+
+        // Função para exibir variação de preço
+        function displayPriceVariation(result) {
+            const resultDiv = document.getElementById("results");
+            resultDiv.innerHTML = `
+                <div class="result-item">
+                    <h3>Variação de Preço</h3>
+                    <p><strong>Marca:</strong> ${result.brand}</p>
+                    <p><strong>Ano 1 (${result.year1}):</strong> ${result.price1}</p>
+                    <p><strong>Ano 2 (${result.year2}):</strong> ${result.price2}</p>
+                    <p><strong>Variação:</strong> ${result.price_variation}</p>
+                </div>
+            `;
+        }
+
+        // Função para exibir histórico de preço
+        function displayPriceHistory(history) {
+            const historyDiv = document.getElementById("history-results");
+            historyDiv.innerHTML = '<h3>Histórico de Preço</h3>';
+            history.forEach(item => {
+                historyDiv.innerHTML += `
+                    <div class="result-item">
+                        <p><strong>Mês:</strong> ${item.month}</p>
+                        <p><strong>Preço:</strong> ${item.price}</p>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
